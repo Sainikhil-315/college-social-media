@@ -22,7 +22,7 @@ const Login = ({ isDarkMode }) => {
     const handleSubmit = async (e) => {
       e.preventDefault();
       try {
-        await login(formData.regd_no, formData.password);
+        await login(formData.regd_no.toUpperCase(), formData.password);
         nav('/home');
       } catch (error) {
         console.error('Login error:', error);

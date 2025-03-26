@@ -1,11 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import Login from '../components/Login';
 import Signup from '../components/Signup';
-
 
 const RegisterPage = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [activeTab, setActiveTab] = useState('login');
+  const { requiresVerification } = useAuth();
+  const nav = useNavigate();
+
+  useEffect(() => {
+    if (requiresVerification) {
+      nav('/verify-otp');
+    }
+  }, [requiresVerification, nav]);
   
   const toggleTheme = () => setIsDarkMode(!isDarkMode);
   

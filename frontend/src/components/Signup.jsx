@@ -3,13 +3,21 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const Signup = ({ isDarkMode }) => {
-
-  const [formData, setFormData] =  useState({
+  const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
     confirmPassword: ''
-  })
+  });
+
+  // New state for error handling
+  const [error, setError] = useState({
+    general: '',
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
+  });
 
   const nav = useNavigate();
   const { register } = useAuth();
@@ -20,24 +28,135 @@ const Signup = ({ isDarkMode }) => {
       ...formData,
       [name]: value
     });
+
+    // Clear specific field error when user starts typing
+    if (error[name]) {
+      setError(prev => ({
+        ...prev,
+        [name]: ''
+      }));
+    }
+  }
+
+  const validateForm = () => {
+    let isValid = true;
+    let errors = {};
+
+    // Clear previous errors
+    setError({
+      general: '',
+      name: '',
+      email: '',
+      password: '',
+      confirmPassword: ''
+    });
+
+    // Name validation
+    if (!formData.name.trim()) {
+      errors.name = 'Full name is required';
+      isValid = false;
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!formData.email.trim()) {
+      errors.email = 'Email is required';
+      isValid = false;
+    } else if (!emailRegex.test(formData.email)) {
+      errors.email = 'Invalid email format';
+      isValid = false;
+    }
+
+    // Password validation
+    if (!formData.password) {
+      errors.password = 'Password is required';
+      isValid = false;
+    } else if (formData.password.length < 8) {
+      errors.password = 'Password must be at least 8 characters long';
+      isValid = false;
+    }
+
+    // Confirm password validation
+    if (formData.password !== formData.confirmPassword) {
+      errors.confirmPassword = 'Passwords do not match';
+      isValid = false;
+    }
+
+    if (!isValid) {
+      setError(prev => ({
+        ...prev,
+        ...errors
+      }));
+    }
+
+    return isValid;
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Reset general error
+    setError(prev => ({ ...prev, general: '' }));
+
+    // Validate form before submission
+    if (!validateForm()) {
+      return;
+    }
+
     try {
-      if(formData.password !== formData.confirmPassword) {
-        console.log("Passwords do not match");
-        return 
-      }
       await register(formData.name, formData.email, formData.password);
       nav('/home');
     } catch (error) {
-      console.error('Login error:', error);
+      // Handle specific backend errors
+      if (error.response) {
+        // Backend returned an error response
+        const errorMessage = error.response.data.message || 'Registration failed';
+        
+        // Check for specific backend error types
+        switch (error.response.status) {
+          case 400:
+            setError(prev => ({ ...prev, general: errorMessage }));
+            break;
+          case 409:
+            // Conflict error (e.g., email already exists)
+            setError(prev => ({ ...prev, email: 'Email is already registered' }));
+            break;
+          case 422:
+            // Validation error from backend
+            if (error.response.data.errors) {
+              const backendErrors = error.response.data.errors;
+              setError(prev => ({
+                ...prev,
+                name: backendErrors.name || '',
+                email: backendErrors.email || '',
+                password: backendErrors.password || ''
+              }));
+            }
+            break;
+          default:
+            setError(prev => ({ ...prev, general: 'An unexpected error occurred' }));
+        }
+      } else if (error.request) {
+        // Network error or no response received
+        setError(prev => ({ ...prev, general: 'No response from server. Please check your internet connection.' }));
+      } else {
+        // Other errors
+        setError(prev => ({ ...prev, general: 'An unexpected error occurred' }));
+      }
+      
+      console.error('Signup error:', error);
     }
   }
 
   return (
     <form className="space-y-6" onSubmit={handleSubmit}>
+      {/* Display general error message */}
+      {error.general && (
+        <div className={`p-4 rounded-md ${isDarkMode ? 'bg-red-900 bg-opacity-50 text-red-200' : 'bg-red-50 text-red-800'}`}>
+          <p>{error.general}</p>
+        </div>
+      )}
+
       <div>
         <label htmlFor="name" className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
           Full Name
@@ -55,12 +174,14 @@ const Signup = ({ isDarkMode }) => {
             required
             className={`appearance-none block w-full pl-10 px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${
               isDarkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'border-gray-300 placeholder-gray-500'
-            }`}
+            } ${error.name ? 'border-red-500' : ''}`}
             placeholder="John Doe"
           />
         </div>
+        {error.name && <p className={`mt-1 text-sm ${isDarkMode ? 'text-red-300' : 'text-red-600'}`}>{error.name}</p>}
       </div>
 
+      {/* Similar modifications for email, password, and confirm password inputs */}
       <div>
         <label htmlFor="signup-email" className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
           Email address
@@ -79,10 +200,11 @@ const Signup = ({ isDarkMode }) => {
             required
             className={`appearance-none block w-full pl-10 px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${
               isDarkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'border-gray-300 placeholder-gray-500'
-            }`}
+            } ${error.email ? 'border-red-500' : ''}`}
             placeholder="example@email.com"
           />
         </div>
+        {error.email && <p className={`mt-1 text-sm ${isDarkMode ? 'text-red-300' : 'text-red-600'}`}>{error.email}</p>}
       </div>
 
       <div>
@@ -102,10 +224,11 @@ const Signup = ({ isDarkMode }) => {
             required
             className={`appearance-none block w-full pl-10 px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${
               isDarkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'border-gray-300 placeholder-gray-500'
-            }`}
+            } ${error.password ? 'border-red-500' : ''}`}
             placeholder="••••••••"
           />
         </div>
+        {error.password && <p className={`mt-1 text-sm ${isDarkMode ? 'text-red-300' : 'text-red-600'}`}>{error.password}</p>}
       </div>
 
       <div>
@@ -125,12 +248,14 @@ const Signup = ({ isDarkMode }) => {
             required
             className={`appearance-none block w-full pl-10 px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${
               isDarkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'border-gray-300 placeholder-gray-500'
-            }`}
+            } ${error.confirmPassword ? 'border-red-500' : ''}`}
             placeholder="••••••••"
           />
         </div>
+        {error.confirmPassword && <p className={`mt-1 text-sm ${isDarkMode ? 'text-red-300' : 'text-red-600'}`}>{error.confirmPassword}</p>}
       </div>
 
+      {/* Rest of the component remains the same */}
       <div className="flex items-center">
         <input
           id="terms"
@@ -156,7 +281,7 @@ const Signup = ({ isDarkMode }) => {
         </button>
       </div>
 
-      {/* Social Signup */}
+      {/* Social Signup section remains the same */}
       <div className="mt-6">
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
