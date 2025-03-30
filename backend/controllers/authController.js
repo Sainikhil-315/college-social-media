@@ -3,24 +3,13 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
 const User = require("../models/User");
+const transporter = require('../utils/emailService');
 
 require("dotenv").config();
-// Transporter configuration
-const transporter = nodemailer.createTransport({
-    service: 'gmail',  // Specify the service explicitly
-    host: 'smtp.gmail.com', // Use Gmail's actual SMTP server
-    port: 587,
-    secure: false,
-    auth: {
-        user: 'bebjdjbbansnwbh@gmail.com',
-        pass: 'wmxk xlni plff xpeh',
-    },
-    debug: true, // Enable debug logging
-});
 
 // Generate JWT Token
 const generateToken = (payload) => {
-    return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+    return jwt.sign(payload, process.env.JWT_SECRET);
 };
 
 // User Registration
