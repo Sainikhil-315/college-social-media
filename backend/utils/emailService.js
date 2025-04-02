@@ -10,4 +10,4 @@ exports.transporter = nodemailer.createTransport({
         pass: 'wmxk xlni plff xpeh',
     },
     debug: true, // Enable debug logging
-});
+}, console.log("Email service is ready to send mails"));
