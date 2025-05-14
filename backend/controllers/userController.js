@@ -127,7 +127,7 @@ exports.getFollowersList = async (req, res) => {
     const authUserId = req.user.userId;  // Authenticated user ID
 
     try {
-        const user = await User.findById(id).populate("followers", "name regd_no email profilePic"); // Fetch target user
+        const user = await User.findById(id).populate("followers", "name regd_no email profilePic followers"); // Fetch target user
         if (!user) {
             return res.status(404).json({ message: "User not found!" });
         }
@@ -199,3 +199,80 @@ exports.searchUser = async (req, res) => {
 exports.myNotifications = async () => {
 
 }
+
+exports.getUserProfile = async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        // Validate if id is provided
+        if (!id) {
+            return res.status(400).json({ 
+                success: false,
+                message: "User ID is required" 
+            });
+        }
+
+        // Log the ID for debugging
+        console.log("Fetching user profile with ID:", id);
+        console.log("Current user from token:", req.user);
+        
+        // You can fetch by ID or regd_no, here we're assuming it's by ID
+        const user = await User.findById(id)
+            .populate({
+                path: "posts",
+                select: "_id image createdAt", // Adjust fields as needed
+            })
+            .populate("followers", "regd_no name profilePic")
+            .populate("following", "regd_no name profilePic");
+            
+        if (!user) {
+            return res.status(404).json({ 
+                success: false,
+                message: "User not found" 
+            });
+        }
+        
+        // Determine if the logged-in user is viewing their own profile
+        // Check both id and userId for compatibility
+        const currentUserId = req.user.id || req.user.userId;
+        const isMyProfile = currentUserId ? 
+            currentUserId.toString() === user._id.toString() : false;
+            
+        // Check if logged-in user is following the target user
+        let isFollowing = false;
+        if (currentUserId) {
+            // Look up the current user to check their following status
+            const currentUser = await User.findById(currentUserId);
+            if (currentUser) {
+                isFollowing = user.followers.some(follower => 
+                    follower._id.toString() === currentUser._id.toString()
+                );
+            }
+        }
+            
+        return res.status(200).json({
+            success: true,
+            isMyProfile,
+            isFollowing,
+            user: {
+                id: user._id,
+                regd_no: user.regd_no,
+                name: user.name,
+                email: user.email,
+                bio: user.bio,
+                profilePic: user.profilePic,
+                postsCount: user.posts.length,
+                posts: user.posts,
+                followers: user.followers,
+                following: user.following,
+            },
+        });
+    } catch (error) {
+        console.error("Get User Profile Error:", error.message);
+        return res.status(500).json({ 
+            success: false,
+            message: "Server error",
+            error: error.message 
+        });
+    }
+};

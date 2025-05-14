@@ -9,28 +9,37 @@ import Sidebar from "./components/Sidebar.jsx";
 import LoadingSpinner from "./utils/LoadingSpinner"; // Create this component
 import NotFound from "./utils/NotFound";
 import Messages from "./pages/Messages.jsx";
-import Notifications from './pages/Notifications.jsx'
-import Search from './pages/Search.jsx'
-import Create from './pages/Create.jsx'
+import Notifications from './pages/Notifications.jsx';
+import Search from './pages/Search.jsx';
+import Create from './pages/Create.jsx';
+import Followers from "./components/followers.jsx";
+import PostDetail from "./components/PostDetail.jsx";
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, requiresVerification, isLoading } = useAuth();
-  
+ 
   // Show loading state while checking authentication
   if (isLoading) {
     return <LoadingSpinner />;
   }
-
   if (requiresVerification) {
     return <Navigate to="/verify-otp" />;
   }
-
   if (!isAuthenticated) {
     return <Navigate to="/register" />;
   }
-
   return children;
+};
+
+// Layout component to wrap Sidebar with protected content
+const SidebarLayout = ({ children }) => {
+  return (
+    <div className="flex">
+      <Sidebar />
+      <div className="flex-1">{children}</div>
+    </div>
+  );
 };
 
 function App() {
@@ -39,82 +48,96 @@ function App() {
       <Routes>
         {/* Public Routes */}
         <Route path="/register" element={<Register />} />
-        <Route 
-          path="/verify-otp" 
-          element={<OTPVerification />} 
-        />
-
-        {/* Protected Routes */}
-        <Route 
-          path="/home" 
+        <Route path="/verify-otp" element={<OTPVerification />} />
+        
+        {/* Protected Routes with Sidebar */}
+        <Route
+          path="/home"
           element={
             <ProtectedRoute>
-              <div className="flex">
-                <Sidebar />
+              <SidebarLayout>
                 <Home />
-              </div>
+              </SidebarLayout>
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/profile" 
+        <Route
+          path="/search"
           element={
             <ProtectedRoute>
-              <div className="flex">
-                <Sidebar />
-                <Profile />
-              </div>
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/messages" 
-          element={
-            <ProtectedRoute>
-              <div className="flex">
-                <Sidebar />
-                <Messages />
-              </div>
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/notifications" 
-          element={
-            <ProtectedRoute>
-              <div className="flex">
-                <Sidebar />
-                <Notifications />
-              </div>
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/search" 
-          element={
-            <ProtectedRoute>
-              <div className="flex">
-                <Sidebar />
+              <SidebarLayout>
                 <Search />
-              </div>
+              </SidebarLayout>
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/create" 
+        
+        <Route
+          path="/messages"
           element={
             <ProtectedRoute>
-              <div className="flex">
-                <Sidebar />
-                <Create />
-              </div>
+              <SidebarLayout>
+                <Messages />
+              </SidebarLayout>
             </ProtectedRoute>
-          } 
+          }
         />
-
+        <Route
+          path="/notifications"
+          element={
+            <ProtectedRoute>
+              <SidebarLayout>
+                <Notifications />
+              </SidebarLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/create"
+          element={
+            <ProtectedRoute>
+              <SidebarLayout>
+                <Create />
+              </SidebarLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile/:userId?"
+          element={
+            <ProtectedRoute>
+              <SidebarLayout>
+                <Profile />
+              </SidebarLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile/:userId?/followers"
+          element={
+            <ProtectedRoute>
+              <SidebarLayout>
+                <Followers />
+              </SidebarLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/post/:postId"
+          element={
+            <ProtectedRoute>
+              <SidebarLayout>
+                <PostDetail />
+              </SidebarLayout>
+            </ProtectedRoute>
+          }
+        />
+        
+               
+        
         {/* Redirect */}
         <Route path="/" element={<Navigate to="/home" />} />  
-        
+       
         {/* 404 Not Found */}
         <Route path="*" element={<NotFound />} />
       </Routes>

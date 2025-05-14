@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
+const User = require('../models/User'); // Adjust path as needed
 
-exports.protect = (req, res, next) => {
+exports.protect = async (req, res, next) => {
     // Get token from header
     const token = req.header('Authorization')?.replace('Bearer ', '');
 
@@ -16,10 +17,22 @@ exports.protect = (req, res, next) => {
             process.env.JWT_SECRET || 'fallback_secret'
         );
 
-        // Attach user to request
+        // Attach user info from token to request
         req.user = decoded;
+        
+        // Optionally fetch full user from database if needed
+        // Uncomment this block if you need full user details in your controllers
+        /*
+        const user = await User.findById(decoded.id).select('-password');
+        if (!user) {
+            return res.status(401).json({ message: 'User not found' });
+        }
+        req.user = user;
+        */
+        
         next();
     } catch (error) {
+        console.error('Auth middleware error:', error.message);
         if (error.name === 'TokenExpiredError') {
             return res.status(401).json({ message: 'Token expired' });
         }
@@ -34,4 +47,4 @@ exports.setCacheHeaders = (req, res, next) => {
       'Expires': '0'
     });
     next();
-  };
+};

@@ -39,19 +39,19 @@ exports.createPost = async (req, res) => {
         if (!user) {
             return res.status(404).json({ message: "User not found!" });
         }
-        const mailOptions = {
-            from: process.env.EMAIL_USER,
-            to: user.email,
-            subject: 'Your post had been uploaded successfully',
-            text: `Hello ${user.name},\n\nYour post has been successfully uploaded on College Social Media. Check it out now!\n\nBest,\nCollege Social Media Team`,
-        };
-        transporter.sendMail(mailOptions, ( error, info ) => {
-            if (error) {
-                console.error("Error sending email:", error);
-            } else {
-                console.log("Email sent:", info.response);
-            }
-        });
+        // const mailOptions = {
+        //     from: process.env.EMAIL_USER,
+        //     to: user.email,
+        //     subject: 'Your post had been uploaded successfully',
+        //     text: `Hello ${user.name},\n\nYour post has been successfully uploaded on College Social Media. Check it out now!\n\nBest,\nCollege Social Media Team`,
+        // };
+        // transporter.sendMail(mailOptions, ( error, info ) => {
+        //     if (error) {
+        //         console.error("Error sending email:", error);
+        //     } else {
+        //         console.log("Email sent:", info.response);
+        //     }
+        // });
 
         // Notify followers about the new post
         // const followers = user.followers; // Assuming followers are stored as an array in User model
@@ -153,21 +153,21 @@ exports.likePost = async (req, res) => {
             return res.status(404).json({ message: "User not found!" });
         }
         console.log(post.user);
-        const mailOptions = {
-            from: process.env.EMAIL_USER,
-            to: post.user.email,
-            subject: 'Liked post',
-            text: `Hello ${post.user.name},\n\YSomeone liked your post. Check it out now!\n\nBest,\nCollege Social Media Team`,
-        };
-        transporter.sendMail(mailOptions, ( error, info ) => {
-            if (error) {
-                console.error("Error sending email:", error);
-            } else {
-                console.log("Email sent:", info.response);
-            }
-        });
+        // const mailOptions = {
+        //     from: process.env.EMAIL_USER,
+        //     to: post.user.email,
+        //     subject: 'Liked post',
+        //     text: `Hello ${post.user.name},\n\YSomeone liked your post. Check it out now!\n\nBest,\nCollege Social Media Team`,
+        // };
+        // transporter.sendMail(mailOptions, ( error, info ) => {
+        //     if (error) {
+        //         console.error("Error sending email:", error);
+        //     } else {
+        //         console.log("Email sent:", info.response);
+        //     }
+        // });
 
-        await createNotification(userId, post.user._id, "like", postId, `${user.name} liked your post`);
+        // await createNotification(userId, post.user._id, "like", postId, `${user.name} liked your post`);
 
         // await post.populate("likes", "regd_no name profilePic");
         res.status(200).json({message: `Successfully liked the post`, likes: post.likes, likesCount: post.likes.length})
@@ -218,22 +218,22 @@ exports.commentOnPost = async (req, res) => {
             return res.status(404).json({ message: "User not found!" });
         }
         // console.log(post.user.name);
-        const mailOptions = {
-            from: process.env.EMAIL_USER,
-            to: post.user.email,
-            subject: 'New comment on your post',
-            text: `Hello ${post.user.name},\n\n${userId} commented on your post!\n\nBest,\nCollege Social Media Team`,
-        };
-        transporter.sendMail(mailOptions, ( error, info ) => {
-            if (error) {
-                console.error("Error sending email:", error);
-            } else {
-                console.log("Email sent:", info.response);
-            }
-        });
-        // await post.populate("comments.user"); // Optional: To return full user details
+        // const mailOptions = {
+        //     from: process.env.EMAIL_USER,
+        //     to: post.user.email,
+        //     subject: 'New comment on your post',
+        //     text: `Hello ${post.user.name},\n\n${userId} commented on your post!\n\nBest,\nCollege Social Media Team`,
+        // };
+        // transporter.sendMail(mailOptions, ( error, info ) => {
+        //     if (error) {
+        //         console.error("Error sending email:", error);
+        //     } else {
+        //         console.log("Email sent:", info.response);
+        //     }
+        // });
+        // // await post.populate("comments.user"); // Optional: To return full user details
 
-        await createNotification(userId, post.user._id, "comment", postId, `${user.name} commented on your post`);
+        // await createNotification(userId, post.user._id, "comment", postId, `${user.name} commented on your post`);
 
         res.status(200).json({message: `Successfully commented on post`, comments: post.comments.reverse()})
     } catch (error) {

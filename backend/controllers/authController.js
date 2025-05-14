@@ -217,11 +217,12 @@ exports.login = async (req, res) => {
             });
         }
 
-        // Generate token
+        // Generate token - Add 'id' field while keeping 'userId' for backward compatibility
         const token = generateToken({ 
             email: user.email, 
             regd_no: user.regd_no,
-            userId: user._id
+            userId: user._id,
+            id: user._id     // Add this line - this is the key change
         });
 
         res.status(200).json({ 
@@ -230,7 +231,8 @@ exports.login = async (req, res) => {
             user: {
                 email: user.email,
                 regd_no: user.regd_no,
-                name: user.name
+                name: user.name,
+                id: user._id  // Add this line for consistency
             }
         });
     } catch (error) {

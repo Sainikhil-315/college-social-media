@@ -1,12 +1,16 @@
+// src/context/AuthContext.js
 import React, { useState, useContext, createContext, useEffect } from "react";
 import { authAPI } from "../api/auth";
 
+// 1. Create Context outside
 const AuthContext = createContext();
 
-export function useAuth() {
+// 2. useAuth Hook defined outside and stable
+export const useAuth = () => {
   return useContext(AuthContext);
-}
+};
 
+// 3. AuthProvider component
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -17,24 +21,19 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const verifyToken = async () => {
       const token = localStorage.getItem("token");
-      
       if (token) {
         try {
-          // Assuming you have an API method to verify the token and get user details
           const response = await authAPI.verifyToken(token);
-          
           if (response.user) {
             setCurrentUser(response.user);
             setIsAuthenticated(true);
             setRequiresVerification(false);
           } else {
-            // Token is invalid
             localStorage.removeItem("token");
             setCurrentUser(null);
             setIsAuthenticated(false);
           }
         } catch (error) {
-          // Token verification failed
           localStorage.removeItem("token");
           setCurrentUser(null);
           setIsAuthenticated(false);
@@ -52,12 +51,13 @@ export const AuthProvider = ({ children }) => {
   const handleLogin = async (regd_no, password) => {
     try {
       const response = await authAPI.login(regd_no, password);
-     
+
       if (response.requiresVerification) {
         setRequiresVerification(true);
         setRegisteredEmail(response.email);
-        throw new Error('Account requires verification');
+        throw new Error("Account requires verification");
       }
+
       if (response.token) {
         localStorage.setItem("token", response.token);
         setCurrentUser(response.user);
@@ -70,16 +70,13 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       throw error;
     }
-  };  
+  };
 
   const handleRegister = async (name, email, password) => {
     try {
       const response = await authAPI.register(name, email, password);
-      
-      // Store email for OTP verification
       setRegisteredEmail(email);
       setRequiresVerification(true);
-      
       return response;
     } catch (error) {
       throw error;
@@ -88,12 +85,11 @@ export const AuthProvider = ({ children }) => {
 
   const handleVerifyOTP = async (otp) => {
     if (!registeredEmail) {
-      throw new Error('No email found for verification');
+      throw new Error("No email found for verification");
     }
 
     try {
       const response = await authAPI.verifyOTP(registeredEmail, otp);
-      
       if (response.token) {
         localStorage.setItem("token", response.token);
         setCurrentUser(response.user);
@@ -110,7 +106,7 @@ export const AuthProvider = ({ children }) => {
 
   const handleRegenerateOTP = async () => {
     if (!registeredEmail) {
-      throw new Error('No email found for OTP regeneration');
+      throw new Error("No email found for OTP regeneration");
     }
 
     try {
@@ -133,7 +129,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Modify the App routing to use isLoading
   const value = {
     user: currentUser,
     isAuthenticated,

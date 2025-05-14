@@ -20,10 +20,15 @@ import { useAuth } from '../context/AuthContext';
 
 const Sidebar = () => {
   const navigate = useNavigate();
-  const [activeItem, setActiveItem] = useState('home');
+  // Determine active item based on current path
+  const path = window.location.pathname;
+  const initialActiveItem = path.split('/')[1] || 'home';
+  
+  const [activeItem, setActiveItem] = useState(initialActiveItem);
   const [isMoreOptionsOpen, setIsMoreOptionsOpen] = useState(false);
 
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
+  
   const handleItemClick = (itemName) => {
     setActiveItem(itemName);
     
@@ -50,7 +55,9 @@ const Sidebar = () => {
         navigate('/create');
         break;
       case 'profile':
-        navigate('/profile');
+        // Get the current user ID from auth context
+        const currentUserId = user?._id || user?.id || 'me'; // Use user ID from context or fallback to 'me'
+        navigate(`/profile/${currentUserId}`);
         break;
       default:
         break;
@@ -62,6 +69,8 @@ const Sidebar = () => {
   };
 
   const handleMoreOptionClick = (optionName) => {
+    setIsMoreOptionsOpen(false);
+    
     switch(optionName) {
       case 'settings':
         navigate('/settings');
@@ -73,7 +82,7 @@ const Sidebar = () => {
         navigate('/saved');
         break;
       case 'logout':
-        // Implement logout logic
+        // Handle logout and redirect to register page
         logout();
         navigate('/register');
         break;
@@ -83,8 +92,8 @@ const Sidebar = () => {
   };
 
   return (
-    <div className="left-0 top-0 h-full w-[250px] bg-white border-r border-gray-300 p-4">
-      <div className="mb-10">
+    <div className="left-0 top-0 h-screen w-[250px] bg-white border-r border-gray-300 p-4 flex flex-col">
+      <div className="flex-grow">
         <p className="text-xl font-bold pl-4 mb-8">College media</p>
 
         <nav>
@@ -124,6 +133,25 @@ const Sidebar = () => {
               size="lg"
             />
             <span>Search</span>
+          </div>
+
+          {/* Explore */}
+          <div
+            className={`
+              flex items-center p-3 rounded-lg cursor-pointer 
+              hover:bg-gray-100 transition-colors duration-200
+              ${activeItem === "explore" ? "font-bold bg-gray-100" : ""}
+            `}
+            onClick={() => handleItemClick("explore")}
+          >
+            <FontAwesomeIcon
+              icon={faCompass}
+              className={`mr-4 ${
+                activeItem === "explore" ? "text-black" : "text-gray-600"
+              }`}
+              size="lg"
+            />
+            <span>Explore</span>
           </div>
 
           {/* Reels */}
@@ -223,7 +251,7 @@ const Sidebar = () => {
         </nav>
       </div>
 
-      <div className="absolute bottom-4 left-0 w-full px-4">
+      <div className="relative">
         {/* More Button */}
         <div
           className="
@@ -240,9 +268,9 @@ const Sidebar = () => {
         {isMoreOptionsOpen && (
           <div
             className="
-              absolute bottom-full left-0 w-55 bg-white 
+              absolute bottom-full left-0 w-full bg-white 
               border border-gray-200 rounded-lg shadow-lg
-              ml-5 mb-2
+              mb-2
             "
           >
             {/* Settings */}
