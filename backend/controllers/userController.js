@@ -216,14 +216,31 @@ exports.getUserProfile = async (req, res) => {
         console.log("Fetching user profile with ID:", id);
         console.log("Current user from token:", req.user);
         
-        // You can fetch by ID or regd_no, here we're assuming it's by ID
-        const user = await User.findById(id)
-            .populate({
-                path: "posts",
-                select: "_id image createdAt", // Adjust fields as needed
-            })
-            .populate("followers", "regd_no name profilePic")
-            .populate("following", "regd_no name profilePic");
+        // Try to find user by ID
+        let user;
+        try {
+            user = await User.findById(id)
+                .populate({
+                    path: "posts",
+                    select: "_id image createdAt", // Adjust fields as needed
+                })
+                .populate("followers", "regd_no name profilePic")
+                .populate("following", "regd_no name profilePic");
+        } catch (err) {
+            // If ID is invalid format, MongoDB throws an error
+            console.log("Invalid ID format, trying to find by regd_no");
+        }
+        
+        // If user not found by ID, try finding by registration number
+        if (!user) {
+            user = await User.findOne({ regd_no: id })
+                .populate({
+                    path: "posts",
+                    select: "_id image createdAt",
+                })
+                .populate("followers", "regd_no name profilePic")
+                .populate("following", "regd_no name profilePic");
+        }
             
         if (!user) {
             return res.status(404).json({ 
@@ -233,8 +250,8 @@ exports.getUserProfile = async (req, res) => {
         }
         
         // Determine if the logged-in user is viewing their own profile
-        // Check both id and userId for compatibility
-        const currentUserId = req.user.id || req.user.userId;
+        // Extract current user ID consistently
+        const currentUserId = req.user ? (req.user.userId || req.user.id || null) : null;
         const isMyProfile = currentUserId ? 
             currentUserId.toString() === user._id.toString() : false;
             
@@ -255,7 +272,9 @@ exports.getUserProfile = async (req, res) => {
             isMyProfile,
             isFollowing,
             user: {
+                // Provide BOTH id and userId for maximum compatibility during transition
                 id: user._id,
+                userId: user._id,  // Add userId field for consistency
                 regd_no: user.regd_no,
                 name: user.name,
                 email: user.email,
@@ -269,6 +288,76 @@ exports.getUserProfile = async (req, res) => {
         });
     } catch (error) {
         console.error("Get User Profile Error:", error.message);
+        return res.status(500).json({ 
+            success: false,
+            message: "Server error",
+            error: error.message 
+        });
+    }
+};
+
+exports.getCurrentUserProfile = async (req, res) => {
+    try {
+        // Ensure user is authenticated
+        if (!req.user) {
+            return res.status(401).json({
+                success: false,
+                message: "Authentication required"
+            });
+        }
+
+        // Get user ID from the authenticated user
+        const userId = req.user.userId || req.user.id;
+        
+        if (!userId) {
+            return res.status(400).json({
+                success: false,
+                message: "User ID not found in token"
+            });
+        }
+
+        console.log("Getting current user profile with ID:", userId);
+        
+        // Find user by ID
+        const user = await User.findById(userId)
+            .populate({
+                path: "posts",
+                select: "_id image createdAt", // Adjust fields as needed
+            })
+            .populate("followers", "regd_no name profilePic")
+            .populate("following", "regd_no name profilePic");
+            
+        if (!user) {
+            return res.status(404).json({ 
+                success: false,
+                message: "User not found" 
+            });
+        }
+        
+        // For current user, we know it's their own profile
+        const isMyProfile = true;
+            
+        return res.status(200).json({
+            success: true,
+            isMyProfile,
+            isFollowing: false, // Not applicable for own profile
+            user: {
+                // Provide both ID formats for consistency
+                id: user._id,
+                userId: user._id,
+                regd_no: user.regd_no,
+                name: user.name,
+                email: user.email,
+                bio: user.bio,
+                profilePic: user.profilePic,
+                postsCount: user.posts.length,
+                posts: user.posts,
+                followers: user.followers,
+                following: user.following,
+            },
+        });
+    } catch (error) {
+        console.error("Get Current User Profile Error:", error.message);
         return res.status(500).json({ 
             success: false,
             message: "Server error",

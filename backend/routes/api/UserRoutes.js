@@ -11,9 +11,11 @@ const {
     getFollowingList,
     searchUser,
     myNotifications,
-    getUserProfile
+    getUserProfile,
+    getCurrentUserProfile
 } = require("../../controllers/userController");
 // Profile updates (name, password, bio, etc.)
+router.get('/profile/me', protect, getCurrentUserProfile);
 router.get("/profile/:id", protect, getUserProfile);
 router.put('/profile/update', protect, updateProfile);
 router.put('/profile/photo', protect, updatePhoto);

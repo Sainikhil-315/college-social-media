@@ -21,8 +21,9 @@ const PostDetail = () => {
   // const { currentUser } = useContext(AuthContext);
   // Temporary user ID for demo purposes - replace with actual auth
   const { user } = useAuth();
-  const currentUserId = user?._id || user?.id || 'me';
-  console.log(currentUserId);
+  console.log("user id from post",post);
+  const currentUserId = user?._id || user?.id || post?.user?._id|| 'me';
+  console.log("user id",currentUserId);
   
   const currentUser = { _id: currentUserId };
   
@@ -41,7 +42,7 @@ const PostDetail = () => {
             likeId === currentUser._id || 
             (typeof likeId === 'object' && likeId?._id === currentUser._id)
           );
-          console.log("User liked post:", userLiked);
+        //   console.log("User liked post:", userLiked);
           setIsLiked(userLiked);
         }
       } catch (error) {
@@ -61,7 +62,7 @@ const PostDetail = () => {
       setIsLoading(true);
       
       // Debug: Log the exact endpoint being called
-      console.log("Attempting to call API with postId:", postId);
+    //   console.log("Attempting to call API with postId:", postId);
       
       if (isLiked) {
         // Implement optimistic UI update first
@@ -229,9 +230,9 @@ const PostDetail = () => {
     : post.comments.slice(0, 2);
 
   // Debug: Log the post owner and current user for comparison
-  console.log("Post user:", post.user);
-  console.log("Current user:", currentUser);
-  console.log("Can delete post:", canDeletePost());
+//   console.log("Post user:", post.user);
+//   console.log("Current user:", currentUser);
+//   console.log("Can delete post:", canDeletePost());
 
   return (
     <div className="max-w-xl mx-auto bg-white border border-gray-200 rounded-sm">

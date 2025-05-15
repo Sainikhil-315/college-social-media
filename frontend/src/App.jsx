@@ -62,7 +62,7 @@ function App() {
           }
         />
         <Route
-          path="/search"
+          path="/search/"
           element={
             <ProtectedRoute>
               <SidebarLayout>
@@ -114,6 +114,16 @@ function App() {
         />
         <Route
           path="/profile/:userId?/followers"
+          element={
+            <ProtectedRoute>
+              <SidebarLayout>
+                <Followers />
+              </SidebarLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile/:userId?/following"
           element={
             <ProtectedRoute>
               <SidebarLayout>

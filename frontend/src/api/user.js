@@ -69,7 +69,18 @@ export const userAPI = {
     // Get following list
     getFollowing: async (userId) => {
         try {
-            const response = await axios.get(`/api/user/${userId}/following`);
+            const response = await axios.get(`/user/${userId}/following`);
+            return response.data;
+        } catch (error) {
+            console.error('Get following error:', error.response?.data);
+            throw new Error(error.response?.data?.message || 'Failed to get following list');
+        }
+    },
+
+    // search user
+    searchUser: async (q) => {
+        try {
+            const response = await axios.get(`/user/search?q=${q}`);
             return response.data;
         } catch (error) {
             console.error('Get following error:', error.response?.data);

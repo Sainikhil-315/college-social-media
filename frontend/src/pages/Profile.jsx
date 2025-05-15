@@ -46,6 +46,11 @@ const Profile = () => {
         // console.log(location.pathname);
         nav(location.pathname + '/followers');
     }
+    const getFollowing = async () => {
+        const data = await userAPI.getFollowing(userId);
+        // console.log(location.pathname);
+        nav(location.pathname + '/following');
+    }
 
     if (loading) return <div className="text-center mt-10">Loading profile...</div>;
     if (error) return <div className="text-center mt-10 text-red-500">Error: {error}</div>;
@@ -71,7 +76,7 @@ const Profile = () => {
                     <div className="flex gap-6 mt-4 text-sm">
                         <span><strong>{user.postsCount || 0}</strong> Posts</span>
                         <span onClick={getFollowers}><strong>{user.followers?.length || 0}</strong> Followers</span>
-                        <span><strong>{user.following?.length || 0}</strong> Following</span>
+                        <span onClick={getFollowing}><strong>{user.following?.length || 0}</strong> Followers</span>
                     </div>
                 </div>
                 <div>

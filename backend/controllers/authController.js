@@ -217,12 +217,11 @@ exports.login = async (req, res) => {
             });
         }
 
-        // Generate token - Add 'id' field while keeping 'userId' for backward compatibility
+        // Generate token - Use consistent field name 'userId' throughout
         const token = generateToken({ 
             email: user.email, 
             regd_no: user.regd_no,
-            userId: user._id,
-            id: user._id     // Add this line - this is the key change
+            userId: user._id   // Use only one consistent field name
         });
 
         res.status(200).json({ 
@@ -232,7 +231,7 @@ exports.login = async (req, res) => {
                 email: user.email,
                 regd_no: user.regd_no,
                 name: user.name,
-                id: user._id  // Add this line for consistency
+                userId: user._id  // Use same field name here
             }
         });
     } catch (error) {
@@ -273,11 +272,7 @@ exports.checkAuthStatus = async (req, res) => {
   
         return res.status(200).json({ 
             success: true, 
-            user: {
-                email: user.email,
-                regd_no: user.regd_no,
-                name: user.name
-            }
+            user
         });
     } catch (error) {
         console.error("Error verifying token:", error);

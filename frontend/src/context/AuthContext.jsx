@@ -20,33 +20,33 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const verifyToken = async () => {
-      const token = localStorage.getItem("token");
-      if (token) {
-        try {
-          const response = await authAPI.verifyToken(token);
-          if (response.user) {
-            setCurrentUser(response.user);
-            setIsAuthenticated(true);
-            setRequiresVerification(false);
-          } else {
-            localStorage.removeItem("token");
-            setCurrentUser(null);
-            setIsAuthenticated(false);
-          }
-        } catch (error) {
-          localStorage.removeItem("token");
-          setCurrentUser(null);
-          setIsAuthenticated(false);
-        } finally {
-          setIsLoading(false);
+        const token = localStorage.getItem("token");
+        if (token) {
+            try {
+                const response = await authAPI.verifyToken(token);
+                if (response.user) {
+                    setCurrentUser(response.user);
+                    setIsAuthenticated(true);
+                    setRequiresVerification(false);
+                } else {
+                    localStorage.removeItem("token");
+                    setCurrentUser(null);
+                    setIsAuthenticated(false);
+                }
+            } catch (error) {
+                localStorage.removeItem("token");
+                setCurrentUser(null);
+                setIsAuthenticated(false);
+            } finally {
+                setIsLoading(false);
+            }
+        } else {
+            setIsLoading(false);
         }
-      } else {
-        setIsLoading(false);
-      }
     };
 
     verifyToken();
-  }, []);
+}, []);
 
   const handleLogin = async (regd_no, password) => {
     try {
@@ -141,7 +141,6 @@ export const AuthProvider = ({ children }) => {
     regenerateOTP: handleRegenerateOTP,
     logout: handleLogout,
   };
-
   return (
     <AuthContext.Provider value={value}>
       {!isLoading && children}
