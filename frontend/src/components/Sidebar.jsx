@@ -239,13 +239,7 @@ const Sidebar = () => {
             `}
             onClick={() => handleItemClick("profile")}
           >
-            <FontAwesomeIcon
-              icon={faUser}
-              className={`mr-4 ${
-                activeItem === "profile" ? "text-black" : "text-gray-600"
-              }`}
-              size="lg"
-            />
+            <img src={user.profilePic} className='w-5 h-5 mr-4 rounded-full object-cover'></img>
             <span>Profile</span>
           </div>
         </nav>

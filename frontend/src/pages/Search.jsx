@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { userAPI } from "../api/user";
 import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const Search = () => {
   const [query, setQuery] = useState("");
   const [users, setUsers] = useState([]);
+  const { user } = useAuth();
 
   useEffect(() => {
     const delayDebounce = setTimeout(async () => {
@@ -36,31 +38,38 @@ const Search = () => {
 
       <div className="mt-4">
         {users.length === 0 && query.trim() !== "" && <p>No users found.</p>}
-        {users.map((user) => (
-          <Link key={user._id} to={"/profile/" + `${user._id}`}>
+        {users.map((person) => (
+          <Link key={person._id} to={"/profile/" + `${person._id}`}>
             <div
-            key={user._id}
-            className="p-2 border-b flex justify-between items-center cursor-pointer"
-          >
-            {/* Grouping photo and name together */}
-            <div className="flex items-center gap-3">
-              <img
-                src={user.profilePic}
-                alt={user.name}
-                width={50}
-                className="rounded-full"
-              />
-              <div>
-                <h3 className="font-bold">{user.name}</h3>
-                <p>{user.regd_no}</p>
+              key={person._id}
+              className="p-2 border-b flex justify-between items-center cursor-pointer"
+            >
+              {/* Grouping photo and name together */}
+              <div className="flex items-center gap-3">
+                <img
+                  src={person.profilePic}
+                  alt={person.name}
+                  width={50}
+                  className="rounded-full"
+                />
+                <div>
+                  <h3 className="font-bold">{person.name}</h3>
+                  <p>{person.regd_no}</p>
+                </div>
               </div>
-            </div>
 
-            {/* Follow button on the right */}
-            <button className="rounded-xl bg-blue-500 text-white px-4 py-1 hover:bg-blue-600">
-              Follow
-            </button>
-          </div>
+              {/* Follow button on the right */}
+              {/* {user._id !== person._id &&
+              (user.following.includes(person._id) ? (
+                <button className="w-24 rounded-xl border-2 text-center px-5 py-1 hover:bg-blue-600 hover:text-white">
+                  Remove
+                </button>
+              ) : (
+                <button className="w-24 rounded-xl border-2 text-center px-5 py-1 hover:bg-blue-600 hover:text-white">
+                  Follow
+                </button>
+              ))} */}
+            </div>
           </Link>
         ))}
       </div>
