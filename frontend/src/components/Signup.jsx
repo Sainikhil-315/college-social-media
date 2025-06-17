@@ -106,6 +106,7 @@ const Signup = ({ isDarkMode }) => {
     try {
       await register(formData.name, formData.email, formData.password);
       nav('/home');
+      window.location.reload();
     } catch (error) {
       // Handle specific backend errors
       if (error.response) {

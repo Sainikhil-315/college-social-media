@@ -5,7 +5,6 @@ export const createAxiosInstance = () => {
     const instance = axios.create({
         baseURL: API_URL,
         withCredentials: true,
-        headers: DEFAULT_HEADERS,
         timeout: 10000,
     });
 

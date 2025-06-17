@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useState } from 'react';
+import Create from '../pages/Create'; // adjust path if needed
 
 const Home = () => {
-  
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
-    <div className="flex ">
-      home Page
+    <div>
+      
     </div>
   );
 };

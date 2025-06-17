@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const upload = require('../../middleware/uploads')
 const { protect } = require("../../middleware/authMiddleware");
 const {
     createPost,
@@ -14,7 +15,7 @@ const {
 } = require("../../controllers/postController");
 
 // Create a new post
-router.post("/create", protect, createPost);
+router.post("/create", protect,upload.single('image'), createPost);
 
 // Get all posts (for feed)
 router.get("/all", protect, getAllPosts);

@@ -24,6 +24,7 @@ const Login = ({ isDarkMode }) => {
       try {
         await login(formData.regd_no.toUpperCase(), formData.password);
         nav('/home');
+        window.location.reload();
       } catch (error) {
         console.error('Login error:', error);
       }

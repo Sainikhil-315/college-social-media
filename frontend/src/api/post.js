@@ -7,6 +7,7 @@ export const postAPI = {
     createPost: async (postData) => {
         try {
             const response = await axios.post('/post/create', postData);
+            console.log("passing to backend");
             return response.data;
         } catch (error) {
             console.error('Error creating post:', error);

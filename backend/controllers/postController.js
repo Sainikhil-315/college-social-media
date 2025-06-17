@@ -24,17 +24,22 @@ const createNotification = async (senderId, receiverId, type, postId, message) =
 };
 
 exports.createPost = async (req, res) => {
-    const { description, image } = req.body;
+    const { description } = req.body;
     const userId = req.user.userId;
     try {
+        // Uploaded file is now on Cloudinary via multer-cloudinary
+        const imageUrl = req.file.path;
+
         const newPost = await Post.create({
-            user: req.user.userId, description, image
+            user: req.user.userId,
+            description,
+            image: imageUrl
         })
         
         await User.findByIdAndUpdate(userId, {$push: {posts: newPost._id } }, { new: true })
         await newPost.save();
 
-        // sending mail to userr for uploading post
+        // sending mail to user for uploading post
         const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({ message: "User not found!" });
@@ -71,7 +76,7 @@ exports.createPost = async (req, res) => {
         })
         
     } catch (error) {
-        console.error(error);
+        console.error("Error uploading post: ", error);
         res.status(500).json({ message: 'Internal server error!' });
     }
 }

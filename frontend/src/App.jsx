@@ -14,6 +14,7 @@ import Search from './pages/Search.jsx';
 import Create from './pages/Create.jsx';
 import Followers from "./components/followers.jsx";
 import PostDetail from "./components/PostDetail.jsx";
+import Following from "./components/Following.jsx";
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -92,7 +93,7 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route
+        {/* <Route
           path="/create"
           element={
             <ProtectedRoute>
@@ -101,7 +102,7 @@ function App() {
               </SidebarLayout>
             </ProtectedRoute>
           }
-        />
+        /> */}
         <Route
           path="/profile/:userId?"
           element={
@@ -127,7 +128,7 @@ function App() {
           element={
             <ProtectedRoute>
               <SidebarLayout>
-                <Followers />
+                <Following />
               </SidebarLayout>
             </ProtectedRoute>
           }

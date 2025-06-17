@@ -20,7 +20,7 @@ const Search = () => {
       } else {
         setUsers([]); // Clear results if query is empty
       }
-    }, 500); // 500ms debounce
+    }, 150); // 500ms debounce
     return () => clearTimeout(delayDebounce);
   }, [query]);
   return (
