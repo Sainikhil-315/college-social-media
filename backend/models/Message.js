@@ -1,12 +1,12 @@
 const mongoose = require('mongoose');
 
 const MessageSchema = mongoose.Schema({
-    sender: {
+    conversationId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
+        ref: "Conversation",
         required: true,
     },
-    receiver: {
+    sender: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
         required: true,
@@ -15,15 +15,57 @@ const MessageSchema = mongoose.Schema({
         type: String,
         required: true,
     },
+    messageType: {
+        type: String,
+        enum: ['text', 'image', 'file', 'voice'],
+        default: 'text'
+    },
     status: {
         type: String,
-        enum: ['unread', 'read'], // Allowed statuses for the message
+        enum: ['unread', 'read'],
         default: 'unread',
     },
-},
-    { timestamps: true }
-);
+    readAt: {
+        type: Date,
+        default: null
+    },
+    isEdited: {
+        type: Boolean,
+        default: false
+    },
+    editedAt: {
+        type: Date,
+        default: null
+    },
+    isDeletedBySender: {
+        type: Boolean,
+        default: false
+    },
+    deletedAt: {
+        type: Date,
+        default: null
+    },
+    // For file/image messages
+    fileUrl: {
+        type: String,
+        default: null
+    },
+    fileName: {
+        type: String,
+        default: null
+    },
+    fileSize: {
+        type: Number,
+        default: null
+    },
+    // For reply functionality
+    replyTo: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Message",
+        default: null
+    }
+}, {
+    timestamps: true
+});
 
-const Notification = mongoose.model("Message", MessageSchema);
-
-module.exports = Notification;
+module.exports = mongoose.model("Message", MessageSchema);
